@@ -1,0 +1,24 @@
+.input-item{
+    width: 180px;
+}
+.record-container{
+    display: flex;
+    margin-top: 30px;
+}
+.record-item{
+    display: inline-block;
+    width: 180px;
+    margin: auto 2px auto 2px;
+}
+.buttons{
+    display: flex;
+    justify-content: space-between;
+    width: 160px;
+    margin-left: 100px;
+}
+.btn{
+    width: 70px;
+}
+.add-button{
+    margin-left: 96px;
+}
