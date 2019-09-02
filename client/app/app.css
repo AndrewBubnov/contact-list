@@ -18,7 +18,14 @@
 }
 .btn{
     width: 70px;
+    height: 25px;
 }
 .add-button{
-    margin-left: 265px;
+    margin-left: 260px;
+}
+.wrapper{
+    display: flex;
+}
+.inner-wrapper{
+    margin-right: 5px;
 }

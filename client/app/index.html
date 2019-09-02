@@ -8,20 +8,32 @@
     <script>
         const app = angular.module("contactList", [])
         app.controller('contactListController', ($scope) => {
-            const text = /[a-z]/gi
+
 
             $scope.items = [];
-
             const items = $scope.items
 
+            $scope.getError = function (error) {
+                console.log(error)
+                if (angular.isDefined(error)) {
+                    if (error.required) {
+                        return "Empty field";
+                    }
+                }
+            }
 
-
-            $scope.addItem = (newContact) => {
-                const contact = JSON.parse(JSON.stringify(newContact))
-                contact.id = items.length;
-                contact.fullName = contact.firstName + ' ' + contact.lastName;
-                items.push(contact)
-                Object.keys(newContact).forEach(item => newContact[item] = '')
+            $scope.addItem = (newContact, isValid) => {
+                if (isValid) {
+                    const contact = JSON.parse(JSON.stringify(newContact))
+                    contact.id = items.length;
+                    contact.fullName = contact.firstName + ' ' + contact.lastName;
+                    items.push(contact)
+                    Object.keys(newContact).forEach(item => newContact[item] = '')
+                    $scope.showError = false;
+                } else {
+                    $scope.message = "Error";
+                    $scope.showError = true;
+                }
             }
 
             $scope.deleteItem = (id) => {
@@ -39,14 +51,43 @@
     </script>
 </head>
 <body ng-controller="contactListController">
+<form name="inputForm" ng-submit="addItem(contact, inputForm.$valid)">
+    <div class="wrapper">
+    <div class="inner-wrapper">
+        <input required ng-model="contact.firstName" placeholder="First Name" class="input-item" name="firstName"/>
+        <div class="error" ng-show="showError">
+            {{getError(inputForm.firstName.$error)}}
+        </div>
+    </div>
+    <div class="inner-wrapper">
+        <input required ng-model="contact.lastName" placeholder="Last Name" class="input-item" name="lastName"/>
+        <div class="error" ng-show="showError">
+            {{getError(inputForm.lastName.$error)}}
+        </div>
+    </div>
+    <div class="inner-wrapper">
+        <input required ng-model="contact.phone" placeholder="Phone" class="input-item" name="phone"/>
+        <div class="error" ng-show="showError">
+            {{getError(inputForm.phone.$error)}}
+        </div>
+    </div>
+    <div class="inner-wrapper">
+        <input required ng-model="contact.cellPhone" placeholder="Cell phone" class="input-item" name="cellPhone"/>
+        <div class="error" ng-show="showError">
+            {{getError(inputForm.cellPhone.$error)}}
+        </div>
+    </div>
+    <div class="inner-wrapper">
+        <input required ng-model="contact.address" placeholder="Address" class="input-item" name="address"/>
+        <div class="error" ng-show="showError">
+            {{getError(inputForm.address.$error)}}
+        </div>
+    </div>
+    <button type="submit" ng-click="addItem(contact)" class="add-button btn">Add</button>
+    </div>
 
-<input ng-model="contact.firstName" placeholder="First Name" class="input-item"/>
-<input ng-model="contact.lastName" placeholder="Last Name" class="input-item"/>
-<input ng-model="contact.phone" placeholder="Phone" class="input-item"/>
-<input ng-model="contact.cellPhone" placeholder="Cell phone" class="input-item"/>
-<input ng-model="contact.address" placeholder="Address" class="input-item"/>
 
-<button ng-click="addItem(contact)" class="add-button btn">Add</button>
+</form>
 <div ng-repeat="item in items" class="record-container">
     <div>
         <input ng-if="item.edited" ng-model="item.contact.firstName" class="input-item">
