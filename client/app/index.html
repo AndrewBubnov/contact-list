@@ -19,7 +19,8 @@
             $scope.addItem = (newContact) => {
                 const contact = JSON.parse(JSON.stringify(newContact))
                 contact.id = items.length;
-                items.push({contact})
+                contact.fullName = contact.firstName + ' ' + contact.lastName;
+                items.push(contact)
                 Object.keys(newContact).forEach(item => newContact[item] = '')
             }
 
@@ -51,28 +52,28 @@
         <input ng-if="item.edited" ng-model="item.contact.firstName" class="input-item">
 
         <div class="record-item" ng-if="!item.edited">
-            {{item.contact.firstName}}
+            {{item.firstName}}
         </div>
-
-
-
-
 
         <input ng-if="item.edited" ng-model="item.contact.lastName" class="input-item">
         <div class="record-item" ng-if="!item.edited">
-            {{item.contact.lastName}}
+            {{item.lastName}}
         </div>
         <input ng-if="item.edited" ng-model="item.contact.phone" class="input-item">
         <div class="record-item" ng-if="!item.edited">
-            {{item.contact.phone}}
+            {{item.phone}}
         </div>
         <input ng-if="item.edited" ng-model="item.contact.cellPhone" class="input-item">
         <div class="record-item" ng-if="!item.edited">
-            {{item.contact.cellPhone}}
+            {{item.cellPhone}}
         </div>
         <input ng-if="item.edited" ng-model="item.contact.address" class="input-item">
         <div class="record-item" ng-if="!item.edited">
-            {{item.contact.address}}
+            {{item.address}}
+        </div>
+        <input ng-if="item.edited" ng-model="item.contact.fullName" class="input-item">
+        <div class="record-item" ng-if="!item.edited">
+            {{item.fullName}}
         </div>
     </div>
     <div class="buttons">
