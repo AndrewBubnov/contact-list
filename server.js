@@ -10,7 +10,7 @@ const PORT = 3000;
 let currentDB;
 app.use(cors());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({extended: true}));
 app.use(compression());
 
 app.get('', async (req, res) => {
@@ -21,31 +21,27 @@ app.get('', async (req, res) => {
 app.post('/api', (req, res) => {
     currentDB.collection('contacts').insertOne(req.body, (err, result) => {
         if (err) console.log(err);
-        console.log('result = ', result)
     });
     res.send(JSON.stringify({status: 'Ok'}));
-
-    // currentDB.collection('passwords').find().toArray(function(err, collArray){
-    //     if (err) console.log(err);
-    //     else {
-    //         if (collArray.map(item => item.login).includes(req.body.login)) {
-    //             res.send(JSON.stringify({status: 'Reject'}));
-    //         }
-    //         else {
-    //             const newClient = {
-    //                 login: req.body.login,
-    //                 password: req.body.password,
-    //             };
-    //             currentDB.collection('passwords').insertOne(newClient, (err, result) =>{
-    //                 if (err) console.log(err);
-    //             });
-    //             res.send(JSON.stringify({status: 'Ok'}));
-    //         }
-    //     }
-    // });
 });
 
+app.put('/api', (req, res) => {
+    const contact = {id: Number(req.body.id)}
+    const set = {}
+    const newKeys = Object.keys(req.body).filter(item => item.substring(0, 2) !== '$$' && item.substring(0, 1) !== '_')
+    newKeys.forEach(item => set[item] = req.body[item])
+    currentDB.collection('contacts').updateOne(contact, { $set: set }, (err, res) => {
+        if (err) console.log(err);
+    })
+});
 
+app.delete('/api/:id', (req,res) => {
+    const contact = {id: Number(req.params.id)}
+
+    currentDB.collection('contacts').deleteOne(contact, (err, result) => {
+        if (err) console.log(err);
+    });
+})
 
 MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
     if (err) throw Error;
@@ -54,4 +50,3 @@ MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
     app.listen(PORT, () => console.log(`Server started on ${PORT} port`));
 
 });
-// exports.api = functions.https.onRequest(app);

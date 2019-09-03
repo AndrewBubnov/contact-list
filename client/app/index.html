@@ -9,7 +9,7 @@
         const app = angular.module("contactList", [])
         app.controller('contactListController', ($scope, $http) => {
             $scope.items = [];
-            const items = $scope.items
+
 
             $scope.getError = function (error) {
                 if (angular.isDefined(error)) {
@@ -21,7 +21,7 @@
 
             $http.get('http://localhost:3000/')
                 .then(response => {
-                    console.log('contacts = ', response.data)
+                    console.log(response.data)
                     $scope.items = response.data
                 })
                 .catch(err => console.log('Error: ', err))
@@ -29,9 +29,9 @@
             $scope.addItem = (newContact, isValid) => {
                 if (isValid) {
                     const contact = JSON.parse(JSON.stringify(newContact))
-                    contact.id = items.length;
+                    contact.id = $scope.items.length;
                     contact.fullName = contact.firstName + ' ' + contact.lastName;
-                    items.push(contact)
+                    $scope.items.push(contact)
                     Object.keys(newContact).forEach(item => newContact[item] = '')
                     $scope.showError = false;
 
@@ -46,24 +46,33 @@
             }
 
             $scope.deleteItem = (id) => {
-                $scope.items.splice(items.indexOf(items.find(element => element.id === id)), 1)
+                const element = $scope.items.find(element => element.id === id)
+                $scope.items.splice($scope.items.indexOf(element), 1)
+                $http.delete(`http://localhost:3000/api/${id}`)
+                    .then(response => console.log(response.data))
+                    .catch(err => console.log('Error: ', err))
             }
 
             $scope.editItem = (id) => {
-                items.filter(element => element.id === id)[0].edited = true
+                console.log('element = ', $scope.items.find(element => element.id === id))
+                $scope.items.find(element => element.id === id).edited = true
             }
 
             $scope.saveItem = (item) => {
-                const element = items.find(element => element.id === item.id)
+                const element = $scope.items.find(element => element.id === item.id)
                 item.fullName = item.firstName + ' ' + item.lastName
-                items.splice(items.indexOf(element), 1, item)
+                $scope.items.splice($scope.items.indexOf(element), 1, item)
                 element.edited = false
+
+                $http.put('http://localhost:3000/api', JSON.stringify(item))
+                    .then(response => console.log(response.data))
+                    .catch(err => console.log('Error: ', err))
             }
         })
     </script>
 </head>
 <body ng-controller="contactListController">
-<!--<form name="inputForm" ng-submit="addItem(contact, inputForm.$valid)">-->
+
 <form name="inputForm">
     <div class="wrapper">
     <div class="inner-wrapper">
