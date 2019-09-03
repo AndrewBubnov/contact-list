@@ -13,10 +13,17 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(compression());
 
-
+app.get('', async (req, res) => {
+    const contacts = await currentDB.collection('contacts').find().toArray()
+    res.send(JSON.stringify(contacts));
+})
 
 app.post('/api', (req, res) => {
-    console.log('req.body = ', req.body)
+    currentDB.collection('contacts').insertOne(req.body, (err, result) => {
+        if (err) console.log(err);
+        console.log('result = ', result)
+    });
+    res.send(JSON.stringify({status: 'Ok'}));
 
     // currentDB.collection('passwords').find().toArray(function(err, collArray){
     //     if (err) console.log(err);

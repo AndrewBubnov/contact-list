@@ -19,6 +19,13 @@
                 }
             }
 
+            $http.get('http://localhost:3000/')
+                .then(response => {
+                    console.log('contacts = ', response.data)
+                    $scope.items = response.data
+                })
+                .catch(err => console.log('Error: ', err))
+
             $scope.addItem = (newContact, isValid) => {
                 if (isValid) {
                     const contact = JSON.parse(JSON.stringify(newContact))
@@ -28,7 +35,7 @@
                     Object.keys(newContact).forEach(item => newContact[item] = '')
                     $scope.showError = false;
 
-                    $http.post('http//localhost:3000/api', JSON.stringify(contact))
+                    $http.post('http://localhost:3000/api', JSON.stringify(contact))
                         .then(response => console.log(response.data))
                         .catch(err => console.log('Error: ', err))
 
