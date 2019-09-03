@@ -7,14 +7,11 @@
     <script src="lib/angular/angular.js"></script>
     <script>
         const app = angular.module("contactList", [])
-        app.controller('contactListController', ($scope) => {
-
-
+        app.controller('contactListController', ($scope, $http) => {
             $scope.items = [];
             const items = $scope.items
 
             $scope.getError = function (error) {
-                console.log(error)
                 if (angular.isDefined(error)) {
                     if (error.required) {
                         return "Empty field";
@@ -30,6 +27,11 @@
                     items.push(contact)
                     Object.keys(newContact).forEach(item => newContact[item] = '')
                     $scope.showError = false;
+
+                    $http.post('http//localhost:3000/api', JSON.stringify(contact))
+                        .then(response => console.log(response.data))
+                        .catch(err => console.log('Error: ', err))
+
                 } else {
                     $scope.message = "Error";
                     $scope.showError = true;
@@ -37,21 +39,25 @@
             }
 
             $scope.deleteItem = (id) => {
-                $scope.items.splice(items.indexOf(items.filter(element => element.id === id)[0]), 1)
+                $scope.items.splice(items.indexOf(items.find(element => element.id === id)), 1)
             }
 
             $scope.editItem = (id) => {
                 items.filter(element => element.id === id)[0].edited = true
             }
 
-            $scope.saveItem = (id) => {
-                const item = items.filter(element => element.id === id)[0].edited = false
+            $scope.saveItem = (item) => {
+                const element = items.find(element => element.id === item.id)
+                item.fullName = item.firstName + ' ' + item.lastName
+                items.splice(items.indexOf(element), 1, item)
+                element.edited = false
             }
         })
     </script>
 </head>
 <body ng-controller="contactListController">
-<form name="inputForm" ng-submit="addItem(contact, inputForm.$valid)">
+<!--<form name="inputForm" ng-submit="addItem(contact, inputForm.$valid)">-->
+<form name="inputForm">
     <div class="wrapper">
     <div class="inner-wrapper">
         <input required ng-model="contact.firstName" placeholder="First Name" class="input-item" name="firstName"/>
@@ -83,36 +89,36 @@
             {{getError(inputForm.address.$error)}}
         </div>
     </div>
-    <button type="submit" ng-click="addItem(contact)" class="add-button btn">Add</button>
+    <button type="submit" ng-click="addItem(contact, inputForm.$valid)" class="add-button btn">Add</button>
     </div>
 
 
 </form>
 <div ng-repeat="item in items" class="record-container">
     <div>
-        <input ng-if="item.edited" ng-model="item.contact.firstName" class="input-item">
+        <input ng-if="item.edited" ng-model="item.firstName" class="input-item">
 
         <div class="record-item" ng-if="!item.edited">
             {{item.firstName}}
         </div>
 
-        <input ng-if="item.edited" ng-model="item.contact.lastName" class="input-item">
+        <input ng-if="item.edited" ng-model="item.lastName" class="input-item">
         <div class="record-item" ng-if="!item.edited">
             {{item.lastName}}
         </div>
-        <input ng-if="item.edited" ng-model="item.contact.phone" class="input-item">
+        <input ng-if="item.edited" ng-model="item.phone" class="input-item">
         <div class="record-item" ng-if="!item.edited">
             {{item.phone}}
         </div>
-        <input ng-if="item.edited" ng-model="item.contact.cellPhone" class="input-item">
+        <input ng-if="item.edited" ng-model="item.cellPhone" class="input-item">
         <div class="record-item" ng-if="!item.edited">
             {{item.cellPhone}}
         </div>
-        <input ng-if="item.edited" ng-model="item.contact.address" class="input-item">
+        <input ng-if="item.edited" ng-model="item.address" class="input-item">
         <div class="record-item" ng-if="!item.edited">
             {{item.address}}
         </div>
-        <input ng-if="item.edited" ng-model="item.contact.fullName" class="input-item">
+        <input ng-if="item.edited" ng-model="item.fullName" class="input-item">
         <div class="record-item" ng-if="!item.edited">
             {{item.fullName}}
         </div>
@@ -121,7 +127,7 @@
         <button ng-click="deleteItem(item.id)" class="btn">Delete</button>
         <div>
             <button ng-if="!item.edited" ng-click="editItem(item.id)" class="btn">Edit</button>
-            <button ng-if="item.edited" ng-click="saveItem(item.id)" class="btn">Save</button>
+            <button ng-if="item.edited" ng-click="saveItem(item)" class="btn">Save</button>
         </div>
     </div>
 </div>
