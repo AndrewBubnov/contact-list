@@ -25,7 +25,7 @@ app.controller('contactListController', ($scope, $http) => {
             contact.fullName = contact.firstName + ' ' + contact.lastName;
             $http.post(PORT + 'add', contact)
                 .then(response => {
-                    console.log(response);
+                    console.log(response)
                     $scope.items.push(response.data)
                     Object.keys(newContact).forEach(item => newContact[item] = '');
                     $scope.showError = false;

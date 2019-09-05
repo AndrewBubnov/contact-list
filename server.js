@@ -18,6 +18,28 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(compression());
 app.use(express.static(__dirname + '/client/app/'));
 
+
+const addContact = (req, res) => {
+            currentDB.collection('contacts').insertOne(req.body, (err, result) => {
+                if (err) res.status(503).send('An error recording to DB occurs');
+                res.send(req.body);
+            });
+}
+
+const validation = (req, res, fn) => {
+    if (JSON.stringify(Object.keys(req.body)) === JSON.stringify(fields)) {
+        if (req.body.firstName.match(letters) && req.body.lastName.match(letters)) {
+            if (req.body.phone.match(phoneNumber) && req.body.cellPhone.match(phoneNumber)){
+                fn(req, res)
+            } else {
+                res.status(503).send('Please enter phone and cell phone in valid format')
+            }
+        } else {
+            res.status(503).send('First name and last name fields should consist of Latin alphabet letters only')
+        }
+    }
+}
+
 app.get('/contacts', async (req, res) => {
     try {
         const contacts = await currentDB.collection('contacts').find().toArray();
@@ -28,21 +50,18 @@ app.get('/contacts', async (req, res) => {
 })
 
 app.post('/contacts/add', (req, res) => {
-    if (JSON.stringify(Object.keys(req.body)) === JSON.stringify(fields)) {
-        if (req.body.firstName.match(letters) && req.body.lastName.match(letters)) {
-            if (req.body.phone.match(phoneNumber) && req.body.cellPhone.match(phoneNumber)){
-                currentDB.collection('contacts').insertOne(req.body, (err, result) => {
-                    if (err) res.sendStatus(503);
-                    res.send(req.body);
-                });
-            } else {
-                res.status(503).send('Please enter phone and cell phone in valid format')
-            }
-        } else {
-            res.status(503).send('First name and last name fields should consist of Latin alphabet letters only')
-        }
-
-    }
+    // if (JSON.stringify(Object.keys(req.body)) === JSON.stringify(fields)) {
+    //     if (req.body.firstName.match(letters) && req.body.lastName.match(letters)) {
+    //         if (req.body.phone.match(phoneNumber) && req.body.cellPhone.match(phoneNumber)){
+    //             addContact(req,res)
+    //         } else {
+    //             res.status(503).send('Please enter phone and cell phone in valid format')
+    //         }
+    //     } else {
+    //         res.status(503).send('First name and last name fields should consist of Latin alphabet letters only')
+    //     }
+    // }
+    validation(req, res, addContact(req, res))
 
 });
 
