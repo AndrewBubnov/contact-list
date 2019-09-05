@@ -3,6 +3,7 @@ app.controller('contactListController', ($scope, $http) => {
     $scope.items = [];
     $scope.serverErrorMessage = '';
     $scope.serverError = false;
+    $scope.oldItem = {};
     const PORT = '/contacts/'
 
     $scope.getError = function (error) {
@@ -23,9 +24,10 @@ app.controller('contactListController', ($scope, $http) => {
         if (isValid) {
             const contact = JSON.parse(JSON.stringify(newContact))
             contact.fullName = contact.firstName + ' ' + contact.lastName;
+            contact.edited = false;
+            console.log('contact = ', contact)
             $http.post(PORT + 'add', contact)
                 .then(response => {
-                    console.log(response)
                     $scope.items.push(response.data)
                     Object.keys(newContact).forEach(item => newContact[item] = '');
                     $scope.showError = false;
@@ -39,17 +41,19 @@ app.controller('contactListController', ($scope, $http) => {
         }
     }
 
-    $scope.deleteItem = (id) => {
-        $http.delete(PORT + 'delete/' + id)
+    $scope.deleteItem = (_id) => {
+        $http.delete(PORT + 'delete/' + _id)
             .then(response => {
-                const element = $scope.items.find(element => element.id === id);
+                const element = $scope.items.find(element => element._id === _id);
                 $scope.items.splice($scope.items.indexOf(element), 1)
             })
             .catch(err => console.log('Error: ', err))
     }
 
     $scope.editItem = (_id) => {
-        $scope.items.find(element => element._id === _id).edited = true
+        const item = $scope.items.find(element => element._id === _id);
+        angular.copy(item, $scope.oldItem);
+        item.edited = true
     }
 
     $scope.saveItem = (item) => {
@@ -58,9 +62,14 @@ app.controller('contactListController', ($scope, $http) => {
         element.edited = false
         $http.put(PORT + 'edit', item)
             .then(response => {
-                $scope.items.splice($scope.items.indexOf(element), 1, item)
+                $scope.items.splice($scope.items.indexOf(element), 1, response.data)
             })
-            .catch(err => console.log('Error: ', err))
+            .catch(err => {
+                $scope.serverErrorMessage = err.data;
+                $scope.serverError = true;
+                $scope.items.splice($scope.items.indexOf(element), 1, $scope.oldItem)
+                $scope.oldItem = {}
+            })
     }
 
     $scope.hideServerErrorMessage = () => {
