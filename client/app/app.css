@@ -29,3 +29,23 @@
 .inner-wrapper{
     margin-right: 5px;
 }
+.error{
+    color: #ff5e5e;
+}
+.server-error{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 940px;
+    height: 30px;
+    background: #ff5e5e;
+    color: #fff;
+    border-radius: 3px;
+}
+.hide-error{
+    position: absolute;
+    right: 20px;
+    background: #fff;
+    color: #ff5e5e;
+}
