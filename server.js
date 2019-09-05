@@ -10,9 +10,9 @@ const PORT = process.env.PORT || 3000;
 const table = 'contacts'
 let dbConnectionError = false;
 let currentDB;
-const fields = ['_id','firstName', 'lastName', 'phone', 'cellPhone', 'address', 'fullName', 'edited'];
+const fields = ['_id', 'firstName', 'lastName', 'phone', 'cellPhone', 'address', 'fullName', 'edited'];
 const letters = /[a-zA-Z]+/;
-const phoneNumber = /^\+?[0-9]{10}/
+const phoneNumber = /^\+?[0-9]{10}/;
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(compression());
@@ -20,19 +20,19 @@ app.use(express.static(__dirname + '/client/app/'));
 
 
 const addContact = (req, res) => {
-            currentDB.collection(table).insertOne(req.body, (err) => {
-                if (err) res.status(503).send('An error recording to DB occurs');
-                else res.send(req.body);
-            });
+    currentDB.collection(table).insertOne(req.body, (err) => {
+        if (err) res.status(503).send('An error recording to DB occurs');
+        else res.send(req.body);
+    });
 }
 
 const editContact = (req, res) => {
     const set = {}
     const keys = Object.keys(req.body).filter(key => key !== '_id')
     keys.forEach(key => set[key] = req.body[key])
-    currentDB.collection(table).updateOne({_id: mongodb.ObjectID(req.body._id)}, { $set: set }, (err, result) => {
+    currentDB.collection(table).updateOne({_id: mongodb.ObjectID(req.body._id)}, {$set: set}, (err, result) => {
         if (err) res.status(503).send('An error editing record in DB occurs');
-        else res.send(req.body)
+        else res.send(req.body);
     })
 }
 
@@ -40,7 +40,7 @@ const validation = (req, res, fn) => {
     const keys = Object.keys(req.body)
     if (keys.every(item => fields.includes(item))) {
         if (req.body.firstName.match(letters) && req.body.lastName.match(letters)) {
-            if (req.body.phone.match(phoneNumber) && req.body.cellPhone.match(phoneNumber)){
+            if (req.body.phone.match(phoneNumber) && req.body.cellPhone.match(phoneNumber)) {
                 fn(req, res)
             } else {
                 res.status(503).send('Please enter phone and cell phone in valid format')
@@ -52,7 +52,7 @@ const validation = (req, res, fn) => {
 }
 
 app.get('/contacts', async (req, res) => {
-    if (!dbConnectionError){
+    if (!dbConnectionError) {
         try {
             const contacts = await currentDB.collection(table).find().toArray();
             res.send(contacts);
@@ -77,7 +77,7 @@ app.delete('/contacts/delete/:id', (req, res) => {
     });
 })
 
-MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
+MongoClient.connect(url, {useNewUrlParser: true}, function (err, db) {
     if (err) dbConnectionError = true;
     console.log("Connected correctly to DB server");
     dbConnectionError = false;
