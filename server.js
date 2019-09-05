@@ -8,12 +8,11 @@ const url = 'mongodb://AndrewBubnov:acnot88_0175A@cluster0-shard-00-00-edszp.mon
     'edszp.mongodb.net:27017,cluster0-shard-00-02-edszp.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true';
 const PORT = process.env.PORT || 3000;
 const table = 'contacts'
+let dbConnectionError = false;
 let currentDB;
-const addFields = ['firstName', 'lastName', 'phone', 'cellPhone', 'address', 'fullName', 'edited'];
-const editFields = ['_id','firstName', 'lastName', 'phone', 'cellPhone', 'address', 'fullName', 'edited'];
+const fields = ['_id','firstName', 'lastName', 'phone', 'cellPhone', 'address', 'fullName', 'edited'];
 const letters = /[a-zA-Z]+/;
 const phoneNumber = /^\+?[0-9]{10}/
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(compression());
@@ -21,14 +20,17 @@ app.use(express.static(__dirname + '/client/app/'));
 
 
 const addContact = (req, res) => {
-            currentDB.collection(table).insertOne(req.body, (err, result) => {
+            currentDB.collection(table).insertOne(req.body, (err) => {
                 if (err) res.status(503).send('An error recording to DB occurs');
                 else res.send(req.body);
             });
 }
 
 const editContact = (req, res) => {
-    currentDB.collection(table).updateOne({_id: mongodb.ObjectID(req.body._id)}, { $set: req.body }, (err, result) => {
+    const set = {}
+    const keys = Object.keys(req.body).filter(key => key !== '_id')
+    keys.forEach(key => set[key] = req.body[key])
+    currentDB.collection(table).updateOne({_id: mongodb.ObjectID(req.body._id)}, { $set: set }, (err, result) => {
         if (err) res.status(503).send('An error editing record in DB occurs');
         else res.send(req.body)
     })
@@ -36,7 +38,7 @@ const editContact = (req, res) => {
 
 const validation = (req, res, fn) => {
     const keys = Object.keys(req.body)
-    if (keys.every(item => addFields.includes(item)) || keys.every(item => editFields.includes(item))) {
+    if (keys.every(item => fields.includes(item))) {
         if (req.body.firstName.match(letters) && req.body.lastName.match(letters)) {
             if (req.body.phone.match(phoneNumber) && req.body.cellPhone.match(phoneNumber)){
                 fn(req, res)
@@ -50,12 +52,14 @@ const validation = (req, res, fn) => {
 }
 
 app.get('/contacts', async (req, res) => {
-    try {
-        const contacts = await currentDB.collection(table).find().toArray();
-        res.send(contacts);
-    } catch (error) {
-        res.status(503).send("Something wrong's happened on server. Please reload the page")
-    }
+    if (!dbConnectionError){
+        try {
+            const contacts = await currentDB.collection(table).find().toArray();
+            res.send(contacts);
+        } catch (error) {
+            res.status(503).send("Something wrong's happened on server. Please reload the page")
+        }
+    } else res.status(503).send('Can not connect to DB at the time. Please try again later')
 })
 
 app.post('/contacts/add', (req, res) => {
@@ -68,15 +72,15 @@ app.put('/contacts/edit', (req, res) => {
 
 app.delete('/contacts/delete/:id', (req, res) => {
     currentDB.collection(table).deleteOne({_id: mongodb.ObjectID(req.params.id)}, (err, result) => {
-        if (err) res.status(503).send('An error deleting record in DB occurs')
+        if (err) res.status(503).send('An error deleting record in DB occurs');
         res.status(200).send(req.params.id)
     });
 })
 
 MongoClient.connect(url, {useNewUrlParser: true}, function(err, db) {
-    if (err) throw Error;
+    if (err) dbConnectionError = true;
     console.log("Connected correctly to DB server");
+    dbConnectionError = false;
     currentDB = db.db("cluster0");
     app.listen(PORT, () => console.log(`Server started on ${PORT} port`));
-
 });

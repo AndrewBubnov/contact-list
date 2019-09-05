@@ -14,18 +14,26 @@ app.controller('contactListController', ($scope, $http) => {
         }
     }
 
+    $scope.showServerErrorMessage = (text) => {
+        $scope.serverErrorMessage = text;
+        $scope.serverError = true;
+    }
+
+    $scope.hideServerErrorMessage = () => {
+        $scope.serverError = false;
+    }
+
     $http.get(PORT)
         .then(response => {
             $scope.items = response.data
         })
-        .catch(err => console.log('Error: ', err));
+        .catch(err => $scope.showServerErrorMessage(err.data));
 
     $scope.addItem = (newContact, isValid) => {
         if (isValid) {
             const contact = JSON.parse(JSON.stringify(newContact))
             contact.fullName = contact.firstName + ' ' + contact.lastName;
             contact.edited = false;
-            console.log('contact = ', contact)
             $http.post(PORT + 'add', contact)
                 .then(response => {
                     $scope.items.push(response.data)
@@ -33,8 +41,7 @@ app.controller('contactListController', ($scope, $http) => {
                     $scope.showError = false;
                 })
                 .catch(err => {
-                    $scope.serverErrorMessage = err.data;
-                    $scope.serverError = true;
+                    $scope.showServerErrorMessage(err.data)
                 });
         } else {
             $scope.showError = true;
@@ -47,7 +54,7 @@ app.controller('contactListController', ($scope, $http) => {
                 const element = $scope.items.find(element => element._id === _id);
                 $scope.items.splice($scope.items.indexOf(element), 1)
             })
-            .catch(err => console.log('Error: ', err))
+            .catch(err => $scope.showServerErrorMessage(err.data))
     }
 
     $scope.editItem = (_id) => {
@@ -65,14 +72,9 @@ app.controller('contactListController', ($scope, $http) => {
                 $scope.items.splice($scope.items.indexOf(element), 1, response.data)
             })
             .catch(err => {
-                $scope.serverErrorMessage = err.data;
-                $scope.serverError = true;
+                $scope.showServerErrorMessage(err.data)
                 $scope.items.splice($scope.items.indexOf(element), 1, $scope.oldItem)
                 $scope.oldItem = {}
             })
-    }
-
-    $scope.hideServerErrorMessage = () => {
-        $scope.serverError = false;
     }
 })
