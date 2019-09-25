@@ -4,8 +4,8 @@ const bodyParser = require('body-parser');
 const compression = require('compression');
 const mongodb = require('mongodb');
 const MongoClient = require('mongodb').MongoClient;
-const url = 'mongodb://AndrewBubnov:acnot88_0175A@cluster0-shard-00-00-edszp.mongodb.net:27017,cluster0-shard-00-01-' +
-    'edszp.mongodb.net:27017,cluster0-shard-00-02-edszp.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true';
+const url = `mongodb://AndrewBubnov:acnot88_0175A@cluster0-shard-00-00-edszp.mongodb.net:27017,cluster0-shard-00-01-
+    edszp.mongodb.net:27017,cluster0-shard-00-02-edszp.mongodb.net:27017/test?ssl=true&replicaSet=Cluster0-shard-0&authSource=admin&retryWrites=true`;
 const PORT = process.env.PORT || 3000;
 const table = 'contacts'
 let dbConnectionError = false;
@@ -77,7 +77,7 @@ app.delete('/contacts/delete/:id', (req, res) => {
     });
 })
 
-MongoClient.connect(url, {useNewUrlParser: true}, function (err, db) {
+MongoClient.connect(url, {useUnifiedTopology: true, useNewUrlParser: true}, function (err, db) {
     if (err) dbConnectionError = true;
     console.log("Connected correctly to DB server");
     dbConnectionError = false;
