@@ -30,7 +30,7 @@ const editContact = (req, res) => {
     const set = {}
     const keys = Object.keys(req.body).filter(key => key !== '_id')
     keys.forEach(key => set[key] = req.body[key])
-    currentDB.collection(table).updateOne({_id: mongodb.ObjectID(req.body._id)}, {$set: set}, (err, result) => {
+    currentDB.collection(table).updateOne({_id: mongodb.ObjectID(req.body._id)}, {$set: req.body}, (err, result) => {
         if (err) res.status(503).send('An error editing record in DB occurs');
         else res.send(req.body);
     })
@@ -77,7 +77,7 @@ app.delete('/contacts/delete/:id', (req, res) => {
     });
 })
 
-MongoClient.connect(url, {useUnifiedTopology: true, useNewUrlParser: true}, function (err, db) {
+MongoClient.connect(url, { useNewUrlParser: true}, function (err, db) {
     if (err) dbConnectionError = true;
     console.log("Connected correctly to DB server");
     dbConnectionError = false;
